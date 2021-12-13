@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from "fs";
 
+// converts received elevation data into simpler format
 const dataX = 14;
 const dataY = 10;
 const data = JSON.parse(readFileSync("elevation.json", "utf-8"));

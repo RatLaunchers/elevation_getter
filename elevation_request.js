@@ -16,6 +16,7 @@ const options = {
   headers: { Accept: "application/json", "Content-Type": "application/json" },
 };
 
+// reads latlon data and converts into proper format for post request
 const data = JSON.parse(readFileSync("latlon.json", "utf-8"));
 const finalData = { locations: [] };
 for (let y = 0; y < data.length; y++) {
@@ -27,6 +28,7 @@ for (let y = 0; y < data.length; y++) {
   }
 }
 console.log(finalData);
+
 // const req = request(options, (res) => {
 //   console.log(`statusCode: ${res.statusCode}`);
 
