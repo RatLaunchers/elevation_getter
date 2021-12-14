@@ -41,6 +41,8 @@ for (let y = 0; y < scaleResY; y++) {
   latLonArray[y].push([pointx.lat, pointx.lon]);
 }
 
+latLonArray.reverse();
+
 writeFile("latlon.json", JSON.stringify(latLonArray), (err) => {
   if (err) throw err;
   console.log("file saved");
