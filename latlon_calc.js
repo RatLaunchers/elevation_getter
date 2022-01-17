@@ -15,7 +15,7 @@ const scaleResX = Math.floor(resX / resolution);
 const scaleResY = Math.floor(resY / resolution);
 
 // meant to allow scaling for any resolution size, but this is a hack job right now so it doesn't
-let finalX = resX - scaleResX * resolution !== 0 ? resX : 0;
+// let finalX = resX - scaleResX * resolution !== 0 ? resX : 0;
 // let finalY = resY - scaleResY * resolution !== 0 ? resY : 0;
 
 let latLonArray = [];
@@ -37,9 +37,17 @@ for (let y = 0; y < scaleResY; y++) {
     let pointx = pointy.destinationPoint(unit * x * resolution, 90);
     latLonArray[y].push([pointx.lat, pointx.lon]);
   }
-  let pointx = pointy.destinationPoint(unit * finalX, 90);
+  let pointx = pointy.destinationPoint(unit * resX, 90);
   latLonArray[y].push([pointx.lat, pointx.lon]);
 }
+let pointy = initPoint.destinationPoint(unit * resY, 0);
+latLonArray.push([]);
+for (let x = 0; x < scaleResX; x++) {
+  let pointx = pointy.destinationPoint(unit * x * resolution, 90);
+  latLonArray[scaleResY].push([pointx.lat, pointx.lon]);
+}
+let pointx = pointy.destinationPoint(unit * resX, 90);
+latLonArray[scaleResY].push([pointx.lat, pointx.lon]);
 
 latLonArray.reverse();
 

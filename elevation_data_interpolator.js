@@ -10,7 +10,7 @@ function bilinearInterpolate(values, x1, y1, x2, y2, x, y) {
 
 // https://gist.github.com/botagar/5d628f06545d5427fe4a694d1a02467e
 
-const data = JSON.parse(readFileSync("elevation_parse.json", "utf-8"));
+const data = JSON.parse(readFileSync("elevation_parse4.json", "utf-8"));
 const dataSpacing = 10;
 const resX = 133; // sim unit x
 const resY = 100; // sim unit y
@@ -19,11 +19,20 @@ let elevationArray = [];
 for (let y = 0; y < resY; y++) {
   elevationArray.push([]);
   for (let x = 0; x < resX; x++) {
-    let closeX = Math.floor(x / 10);
-    let closeY = Math.floor(y / 10);
-    if (closeX === 0 && closeY === 0){
-      elevationArray[y].push(data[y/10][x/10]);
-    } else {
-    elevationArray[y].push(bilinearInterpolate(data,));
-  }}
+    if (data[y][x] === "void") {
+      
+      elevationArray[y].push(bilinearInterpolate(data));
+    }
+  }
 }
+// for (let y = 0; y < resY; y++) {
+//   elevationArray.push([]);
+//   for (let x = 0; x < resX; x++) {
+//     let closeX = Math.floor(x / 10);
+//     let closeY = Math.floor(y / 10);
+//     if (closeX === 0 && closeY === 0){
+//       elevationArray[y].push(data[y/10][x/10]);
+//     } else {
+//     elevationArray[y].push(bilinearInterpolate(data,));
+//   }}
+// }
