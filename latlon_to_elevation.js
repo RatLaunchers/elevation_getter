@@ -1,9 +1,121 @@
-import { readFileSync, writeFileSync } from "fs";
+import LatLon from "geodesy/latlon-ellipsoidal-vincenty.js";
+import { request } from "https";
+import { writeFileSync } from "fs";
+
+// Get latlon coordinates
+
+// the bottom left corner of the map
+const initLat = 51.030035;
+const initLon = -113.8749132;
+const initPoint = new LatLon(initLat, initLon);
+
+const unit = 9.07; // in meters
+const resolution = 10; // resolution of latlon array in units, one unit is 9.07 meters
+const resX = 133; // sim unit x
+const resY = 100; // sim unit y
+
+const scaleResX = Math.floor(resX / resolution);
+const scaleResY = Math.floor(resY / resolution);
+
+// meant to allow scaling for any resolution size, but this is a hack job right now so it doesn't
+// let finalX = resX - scaleResX * resolution !== 0 ? resX : 0;
+// let finalY = resY - scaleResY * resolution !== 0 ? resY : 0;
+
+let latLonArray = [];
+// for (let y = 0; y < resY; y++) {
+//   // non scale version
+//   let pointy = initPoint.destinationPoint(unit * y, 0);
+//   latLonArray.push([]);
+//   for (let x = 0; x < resX; x++) {
+//     let pointx = pointy.destinationPoint(unit * x, 90);
+//     latLonArray[y].push([pointx.lat, pointx.lon]);
+//   }
+// }
+
+for (let y = 0; y < scaleResY; y++) {
+  // scale version
+  let pointy = initPoint.destinationPoint(unit * y * resolution, 0);
+  latLonArray.push([]);
+  for (let x = 0; x < scaleResX; x++) {
+    let pointx = pointy.destinationPoint(unit * x * resolution, 90);
+    latLonArray[y].push([pointx.lat, pointx.lon]);
+  }
+  let pointx = pointy.destinationPoint(unit * resX, 90);
+  latLonArray[y].push([pointx.lat, pointx.lon]);
+}
+let pointy = initPoint.destinationPoint(unit * resY, 0);
+latLonArray.push([]);
+for (let x = 0; x < scaleResX; x++) {
+  let pointx = pointy.destinationPoint(unit * x * resolution, 90);
+  latLonArray[scaleResY].push([pointx.lat, pointx.lon]);
+}
+let pointx = pointy.destinationPoint(unit * resX, 90);
+latLonArray[scaleResY].push([pointx.lat, pointx.lon]);
+
+latLonArray.reverse();
+
+// Get elevation data at those coordinates
+
+// const options = {
+//   hostname: "api.open-elevation.com",
+//   port: 443,
+//   path: `/api/v1/lookup?locations=${lat},${lon}`,
+//   method: "GET",
+// };
+
+const options = {
+  hostname: "api.open-elevation.com",
+  port: 443,
+  path: `/api/v1/lookup`,
+  method: "POST",
+  headers: { Accept: "application/json", "Content-Type": "application/json" },
+};
+
+// reads latlon data and converts into proper format for post request
+let data = latLonArray;
+let finalData = { locations: [] };
+for (let y = 0; y < data.length; y++) {
+  for (let x = 0; x < data[y].length; x++) {
+    finalData.locations.push({
+      latitude: data[y][x][0],
+      longitude: data[y][x][1],
+    });
+  }
+}
+
+// const req = request(options, (res) => {
+//   console.log(`statusCode: ${res.statusCode}`);
+
+//   res.on("data", (d) => {
+//     process.stdout.write(d);
+//   });
+// });
+
+// req.on("error", (error) => {
+//   console.error(error);
+// });
+
+// req.end();
+
+let receivedData;
+
+const req = request(options, (res) => {
+  res.setEncoding("utf-8");
+  res.on("data", (chunk) => {
+    receivedData = chunk;
+  });
+});
+
+req.write(JSON.stringify(finalData));
+req.end();
+//1046
+
+// Interpolation
 
 // converts received elevation data into simpler format
 const dataX = 14;
 const dataY = 11;
-const data = JSON.parse(readFileSync("elevation.json", "utf-8"));
+data = receivedData;
 let hundredVoid = [];
 for (let i = 0; i < 133; i++) {
   hundredVoid.push("void");
@@ -20,7 +132,7 @@ the last x row only has 8 voids between it and the previous as the grid needs st
 */
 
 //data formatting, adding voids
-let finalData = [];
+finalData = [];
 for (let y = 0; y < dataY; y++) {
   finalData.push([]);
   for (let x = 0; x < dataX; x++) {
@@ -144,7 +256,7 @@ for (let y = 0; y < finalData.length; y++) {
 }
 
 writeFileSync(
-  "elevation_parse_finalanother.json",
+  "elevation_parse_final.json",
   JSON.stringify(finalFinalData),
   (err) => {
     if (err) throw err;

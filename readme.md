@@ -18,10 +18,6 @@ Use elevation_request.js to pull elevation numbers from open-elevation
 
 ### 3
 
-Use elevation_parser.js to convert api data into format for interpolation (why not just make part of interpolation?)
+Use elevation_parser.js to convert api data into format for interpolation, then it interpolates
 
 dataX and dataY are the width and height of the array
-
-### 4
-
-Use elevation_data_interpolator to interpolate
