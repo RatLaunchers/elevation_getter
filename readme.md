@@ -4,20 +4,8 @@ hack job that takes a bottom left coordinate and spits out 9.07 meter (or any mu
 
 Lat and lon data is then fed into open-elevation api to get elevation data
 
-## how to use (only God knows)
+## how to use
 
-### 1
+in `latlon_to_elevation.js` there are two variables called `initLat` and `initLon` put the lattitute and longitude of the bottom left corner of the map in
 
-Use latlon_calc.js to create latlon.json a json with the latlon of the desired points along the defined rectangle
-
-note: the point defined is the bottom left point of the rectangle
-
-### 2
-
-Use elevation_request.js to pull elevation numbers from open-elevation
-
-### 3
-
-Use elevation_parser.js to convert api data into format for interpolation, then it interpolates
-
-dataX and dataY are the width and height of the array
+`node latlon_elevation.js` to run the script, `elevation_final.json` will be created (or updated)

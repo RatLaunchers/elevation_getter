@@ -144,7 +144,7 @@ for (let y = 0; y < finalData.length; y++) {
 }
 
 writeFileSync(
-  "elevation_parse_finalanother.json",
+  "elevation_parse_finalanothertest.json",
   JSON.stringify(finalFinalData),
   (err) => {
     if (err) throw err;

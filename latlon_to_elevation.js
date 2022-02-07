@@ -5,8 +5,9 @@ import { writeFileSync } from "fs";
 // Get latlon coordinates
 
 // the bottom left corner of the map
-const initLat = 51.030035;
-const initLon = -113.8749132;
+// map2: 50.913693, -114.165181
+const initLat = 50.913693;
+const initLon = -114.165181;
 const initPoint = new LatLon(initLat, initLon);
 
 const unit = 9.07; // in meters
@@ -97,25 +98,47 @@ for (let y = 0; y < data.length; y++) {
 
 // req.end();
 
-let receivedData;
+// const req = request(options, (res) => {
+//   res.setEncoding("utf-8");
+//   res.on("data", (chunk) => {
+//     let receivedData = chunk;
+//   });
+// });
 
-const req = request(options, (res) => {
-  res.setEncoding("utf-8");
-  res.on("data", (chunk) => {
-    receivedData = chunk;
-  });
-});
-
-req.write(JSON.stringify(finalData));
-req.end();
+// req.write(JSON.stringify(finalData));
+// req.end();
 //1046
+
+function doRequest(options, data) {
+  return new Promise((resolve, reject) => {
+    const req = request(options, (res) => {
+      res.setEncoding("utf8");
+      let responseBody = "";
+
+      res.on("data", (chunk) => {
+        responseBody = chunk;
+      });
+
+      res.on("end", () => {
+        resolve(JSON.parse(responseBody));
+      });
+    });
+
+    req.on("error", (err) => {
+      reject(err);
+    });
+
+    req.write(data);
+    req.end();
+  });
+}
 
 // Interpolation
 
 // converts received elevation data into simpler format
 const dataX = 14;
 const dataY = 11;
-data = receivedData;
+data = await doRequest(options, JSON.stringify(finalData));
 let hundredVoid = [];
 for (let i = 0; i < 133; i++) {
   hundredVoid.push("void");
@@ -255,11 +278,6 @@ for (let y = 0; y < finalData.length; y++) {
   }
 }
 
-writeFileSync(
-  "elevation_parse_final.json",
-  JSON.stringify(finalFinalData),
-  (err) => {
-    if (err) throw err;
-    console.log("file saved");
-  }
-);
+writeFileSync("elevation_final.json", JSON.stringify(finalFinalData), (err) => {
+  if (err) throw err;
+});
